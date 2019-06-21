@@ -94,4 +94,50 @@ module.exports = class Calculator {
 
         return outputQueue.join(' ');
     }
+
+    calculateRPNExpression(expression) {
+        if (!isString(expression)) {
+            throw new Error('The expression is not a string.');
+        }
+
+        const operators = ['+', '-', '*', '/'];
+        const calculationStack = [];
+        const expressionArray = expression.split(' ');
+
+        expressionArray.forEach((expressionToken) => {
+            if (isNumber(expressionToken)) {
+                this._addOperandToStack(expressionToken, calculationStack);
+            } else if (this._isOperator(operators, expressionToken)) {
+                const operator = expressionToken;
+
+                if (calculationStack.length < 2) {
+                    throw new Error('Not enough operands were found in the expression.');
+                }
+
+                const secondOperand = Number.parseFloat(calculationStack.pop());
+                const firstOperand = Number.parseFloat(calculationStack.pop());
+
+                switch (operator) {
+                    case '+': return calculationStack.push(firstOperand + secondOperand);
+                    case '-': return calculationStack.push(firstOperand - secondOperand);
+                    case '*': return calculationStack.push(firstOperand * secondOperand);
+                    case '/':
+                        if (secondOperand === 0) throw new Error('The expression exist divide by zero.');
+
+                        return calculationStack.push(firstOperand / secondOperand);
+                    default:
+                }
+            } else {
+                const availableOperations = operators.join(' ');
+
+                throw new Error(`Unknown arithmetic operator was found in the expression. The available operations: ${availableOperations}`);
+            }
+        });
+
+        if (calculationStack.length > 1) {
+            throw new Error('Not enough operands were found in the expression.');
+        }
+
+        return calculationStack.join('');
+    }
 };
