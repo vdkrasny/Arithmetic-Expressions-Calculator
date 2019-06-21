@@ -2,12 +2,8 @@ const isNumber = require('../utils/isNumber');
 const isString = require('../utils/isString');
 
 module.exports = class Calculator {
-    constructor(operators) {
-        this.operators = ['(', ')', '+', '-', '*', '/'] || operators;
-    }
-
-    _isOperator(operator) {
-        if (this.operators.indexOf(operator) !== -1) {
+    _isOperator(operators, operator) {
+        if (operators.indexOf(operator) !== -1) {
             return true;
         }
 
@@ -29,25 +25,30 @@ module.exports = class Calculator {
         }
     }
 
+    _addOperandToStack(operand, stack) {
+        const parsedOperand = Number.parseFloat(operand);
+
+        if (parsedOperand < 0) {
+            throw new Error('The negative operand was found in the expression');
+        }
+
+        return stack.push(operand);
+    }
+
     convertToRPN(expression) {
         if (!isString(expression)) {
             throw new Error('The expression is not a string.');
         }
 
+        const operators = ['(', ')', '+', '-', '*', '/'];
         const operatorsStack = [];
         const outputQueue = [];
         const expressionArray = expression.split(' ');
 
-        expressionArray.forEach((expressionToken, expressionIndex) => {
+        expressionArray.forEach((expressionToken) => {
             if (isNumber(expressionToken)) {
-                const parsedNumber = Number.parseFloat(expressionToken);
-
-                if (parsedNumber < 0) {
-                    throw new Error('The unary operation was found in the expression');
-                }
-
-                outputQueue.push(parsedNumber);
-            } else if (this._isOperator(expressionToken)) {
+                this._addOperandToStack(expressionToken, outputQueue);
+            } else if (this._isOperator(operators, expressionToken)) {
                 const operator = expressionToken;
 
                 if (operator === '(') {
@@ -75,8 +76,9 @@ module.exports = class Calculator {
                     operatorsStack.push(operator);
                 }
             } else {
-                const availableOperations = this.operators.join(' ');
-                throw new Error(`Forbidden arithmetic operations were found in the expression. The available operations: ${availableOperations}`);
+                const availableOperations = operators.join(' ');
+
+                throw new Error(`Unknown arithmetic operator was found in the expression. The available operations: ${availableOperations}`);
             }
         });
 
