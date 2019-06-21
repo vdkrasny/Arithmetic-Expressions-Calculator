@@ -2,12 +2,133 @@ const isNumber = require('../utils/isNumber');
 const isString = require('../utils/isString');
 
 module.exports = class Calculator {
-    _isOperator(operators, operator) {
-        if (operators.indexOf(operator) !== -1) {
-            return true;
+    convertToRPN(expression) {
+        if (!isString(expression)) {
+            throw new Error('The expression is not a string.');
         }
 
-        return false;
+        const operatorsStack = [];
+        const outputStack = [];
+        const expressionArray = expression.split(' ');
+
+        expressionArray.forEach((expressionToken) => {
+            if (isNumber(expressionToken)) {
+                this._pushOperandToStack(expressionToken, outputStack);
+            } else {
+                const operator = expressionToken;
+
+                switch (operator) {
+                    case '(': {
+                        operatorsStack.push(operator);
+                        break;
+                    }
+                    case ')': {
+                        let popOperator = operatorsStack.pop();
+
+                        while (popOperator !== '(') {
+                            if (!operatorsStack.length) {
+                                throw new Error('The Bad Sequence Error: an opening parenthesis was missed in the expression.');
+                            }
+
+                            outputStack.push(popOperator);
+                            popOperator = operatorsStack.pop();
+                        }
+                        break;
+                    }
+                    case '+': return this._operatorHandler('+', operatorsStack, outputStack);
+                    case '-': return this._operatorHandler('-', operatorsStack, outputStack);
+                    case '*': return this._operatorHandler('*', operatorsStack, outputStack);
+                    case '/': return this._operatorHandler('/', operatorsStack, outputStack);
+                    default: {
+                        const availableOperations = ['(', ')', '+', '-', '*', '/'].join(' ');
+
+                        throw new Error(`Unknown arithmetic operator was found in the expression. The available operations: ${availableOperations}`);
+                    }
+                }
+            }
+        });
+
+        while (operatorsStack.length > 0) {
+            const popOperator = operatorsStack.pop();
+
+            if (popOperator === '(') {
+                throw new Error('The Bad Sequence Error: an closing parenthesis was missed in the expression.');
+            }
+
+            outputStack.push(popOperator);
+        }
+
+        return outputStack.join(' ');
+    }
+
+    calculateRPNExpression(expression) {
+        if (!isString(expression)) {
+            throw new Error('The expression is not a string.');
+        }
+
+        const calculationStack = [];
+        const expressionArray = expression.split(' ');
+
+        expressionArray.forEach((expressionToken) => {
+            if (isNumber(expressionToken)) {
+                this._pushOperandToStack(expressionToken, calculationStack);
+            } else {
+                const operator = expressionToken;
+
+                if (calculationStack.length < 2) {
+                    throw new Error('Not enough operands were found in the expression.');
+                }
+
+                const secondOperand = Number.parseFloat(calculationStack.pop());
+                const firstOperand = Number.parseFloat(calculationStack.pop());
+
+                switch (operator) {
+                    case '+': return calculationStack.push(firstOperand + secondOperand);
+                    case '-': return calculationStack.push(firstOperand - secondOperand);
+                    case '*': return calculationStack.push(firstOperand * secondOperand);
+                    case '/': {
+                        if (secondOperand === 0) throw new Error('The expression exist divide by zero.');
+
+                        return calculationStack.push(firstOperand / secondOperand);
+                    }
+                    default: {
+                        const availableOperations = ['+', '-', '*', '/'].join(' ');
+
+                        throw new Error(`Unknown arithmetic operator was found in the expression. The available operations: ${availableOperations}`);
+                    }
+                }
+            }
+        });
+
+        if (calculationStack.length > 1) {
+            throw new Error('Not enough operands were found in the expression.');
+        }
+
+        return calculationStack.join(' ');
+    }
+
+    _pushOperandToStack(operand, stack) {
+        const parsedOperand = Number.parseFloat(operand);
+
+        if (parsedOperand < 0) {
+            throw new Error('The negative operand was found in the expression');
+        }
+
+        return stack.push(operand);
+    }
+
+    _operatorHandler(operator, operatorsStack, outputStack) {
+        if (!operatorsStack.length) {
+            operatorsStack.push(operator);
+        } else {
+            const topOperator = operatorsStack[operatorsStack.length - 1];
+
+            if (this._getOperatorPriority(operator) <= this._getOperatorPriority(topOperator)) {
+                outputStack.push(operatorsStack.pop());
+            }
+
+            operatorsStack.push(operator);
+        }
     }
 
     _getOperatorPriority(operator) {
@@ -23,121 +144,5 @@ module.exports = class Calculator {
                 return 2;
             default: return 3;
         }
-    }
-
-    _addOperandToStack(operand, stack) {
-        const parsedOperand = Number.parseFloat(operand);
-
-        if (parsedOperand < 0) {
-            throw new Error('The negative operand was found in the expression');
-        }
-
-        return stack.push(operand);
-    }
-
-    convertToRPN(expression) {
-        if (!isString(expression)) {
-            throw new Error('The expression is not a string.');
-        }
-
-        const operators = ['(', ')', '+', '-', '*', '/'];
-        const operatorsStack = [];
-        const outputQueue = [];
-        const expressionArray = expression.split(' ');
-
-        expressionArray.forEach((expressionToken) => {
-            if (isNumber(expressionToken)) {
-                this._addOperandToStack(expressionToken, outputQueue);
-            } else if (this._isOperator(operators, expressionToken)) {
-                const operator = expressionToken;
-
-                if (operator === '(') {
-                    operatorsStack.push(operator);
-                } else if (operator === ')') {
-                    let popOperator = operatorsStack.pop();
-
-                    while (popOperator !== '(') {
-                        if (!operatorsStack.length) {
-                            throw new Error('The Bad Sequence Error: an opening parenthesis was missed in the expression.');
-                        }
-
-                        outputQueue.push(popOperator);
-                        popOperator = operatorsStack.pop();
-                    }
-                } else if (!operatorsStack.length) {
-                    operatorsStack.push(operator);
-                } else {
-                    const topOperator = operatorsStack[operatorsStack.length - 1];
-
-                    if (this._getOperatorPriority(operator) <= this._getOperatorPriority(topOperator)) {
-                        outputQueue.push(operatorsStack.pop());
-                    }
-
-                    operatorsStack.push(operator);
-                }
-            } else {
-                const availableOperations = operators.join(' ');
-
-                throw new Error(`Unknown arithmetic operator was found in the expression. The available operations: ${availableOperations}`);
-            }
-        });
-
-        while (operatorsStack.length > 0) {
-            const popOperator = operatorsStack.pop();
-
-            if (popOperator === '(') {
-                throw new Error('The Bad Sequence Error: an closing parenthesis was missed in the expression.');
-            }
-
-            outputQueue.push(popOperator);
-        }
-
-        return outputQueue.join(' ');
-    }
-
-    calculateRPNExpression(expression) {
-        if (!isString(expression)) {
-            throw new Error('The expression is not a string.');
-        }
-
-        const operators = ['+', '-', '*', '/'];
-        const calculationStack = [];
-        const expressionArray = expression.split(' ');
-
-        expressionArray.forEach((expressionToken) => {
-            if (isNumber(expressionToken)) {
-                this._addOperandToStack(expressionToken, calculationStack);
-            } else if (this._isOperator(operators, expressionToken)) {
-                const operator = expressionToken;
-
-                if (calculationStack.length < 2) {
-                    throw new Error('Not enough operands were found in the expression.');
-                }
-
-                const secondOperand = Number.parseFloat(calculationStack.pop());
-                const firstOperand = Number.parseFloat(calculationStack.pop());
-
-                switch (operator) {
-                    case '+': return calculationStack.push(firstOperand + secondOperand);
-                    case '-': return calculationStack.push(firstOperand - secondOperand);
-                    case '*': return calculationStack.push(firstOperand * secondOperand);
-                    case '/':
-                        if (secondOperand === 0) throw new Error('The expression exist divide by zero.');
-
-                        return calculationStack.push(firstOperand / secondOperand);
-                    default:
-                }
-            } else {
-                const availableOperations = operators.join(' ');
-
-                throw new Error(`Unknown arithmetic operator was found in the expression. The available operations: ${availableOperations}`);
-            }
-        });
-
-        if (calculationStack.length > 1) {
-            throw new Error('Not enough operands were found in the expression.');
-        }
-
-        return calculationStack.join('');
     }
 };

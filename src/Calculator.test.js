@@ -2,8 +2,8 @@ const Calculator = require('./Calculator');
 
 const calculator = new Calculator();
 
-describe('Test the Calculator methods.', () => {
-    describe('Testing the convertToRPN method', () => {
+describe('Functionality of the Arithmetic Expressions Calculator.', () => {
+    describe('The convertToRPN method', () => {
         it('Should throw an error if the expression is not a string', () => {
             const wrongInfixExpression = 1;
 
@@ -60,7 +60,7 @@ describe('Test the Calculator methods.', () => {
         });
     });
 
-    describe('Testing the calculateRPNExpression method', () => {
+    describe('The calculateRPNExpression method', () => {
         it('Should throw an error if the expression is not a string', () => {
             const wrongRPNExpression = 1;
 
