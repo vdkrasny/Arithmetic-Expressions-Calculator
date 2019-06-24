@@ -1,5 +1,4 @@
-const isNumber = require('../utils/isNumber');
-const isString = require('../utils/isString');
+const { isNumber, isString } = require('../utils');
 
 module.exports = class Calculator {
     convertToRPN(expression) {
@@ -46,6 +45,8 @@ module.exports = class Calculator {
                     }
                 }
             }
+
+            return undefined;
         });
 
         while (operatorsStack.length > 0) {
@@ -87,7 +88,9 @@ module.exports = class Calculator {
                     case '-': return calculationStack.push(firstOperand - secondOperand);
                     case '*': return calculationStack.push(firstOperand * secondOperand);
                     case '/': {
-                        if (secondOperand === 0) throw new Error('The expression exist divide by zero.');
+                        if (secondOperand === 0) {
+                            throw new Error('The expression exist divide by zero.');
+                        }
 
                         return calculationStack.push(firstOperand / secondOperand);
                     }
@@ -98,6 +101,8 @@ module.exports = class Calculator {
                     }
                 }
             }
+
+            return undefined;
         });
 
         if (calculationStack.length > 1) {
