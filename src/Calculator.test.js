@@ -98,8 +98,8 @@ describe('Functionality of the Arithmetic Expressions Calculator.', () => {
 
         describe('Results of the calculation of the expression in the Reverse Polish Notation', () => {
             const expressions = [
-                ['3 4 2 * 1 5 - / +', '1'],
-                ['1 3 4 + + 2 1 + * 2 * 1 5 - /', '-12']
+                ['3 4 2 * 1 5 - / +', 1],
+                ['1 3 4 + + 2 1 + * 2 * 1 5 - /', -12]
             ];
 
             expressions.forEach(([expressionInRPN, expressionResult]) => {

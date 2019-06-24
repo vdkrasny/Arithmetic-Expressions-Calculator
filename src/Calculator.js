@@ -109,7 +109,7 @@ module.exports = class Calculator {
             throw new Error('Not enough operands were found in the expression.');
         }
 
-        return calculationStack.join(' ');
+        return calculationStack.pop();
     }
 
     _pushOperandToStack(operand, stack) {
