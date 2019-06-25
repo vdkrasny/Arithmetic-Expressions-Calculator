@@ -1,0 +1,29 @@
+{
+  "name": "arithmetic-expressions-calculator",
+  "version": "0.0.1",
+  "description": "Allows to calculate arithmetic expression that is provided as string.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vdkrasny/arithmetic-expressions-calculator.git"
+  },
+  "keywords": [
+    "nodejs"
+  ],
+  "author": "vdkrasny",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vdkrasny/arithmetic-expressions-calculator/issues"
+  },
+  "homepage": "https://github.com/vdkrasny/arithmetic-expressions-calculator#readme",
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.3",
+    "jest": "^24.8.0"
+  }
+}
